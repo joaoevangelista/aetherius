@@ -11,19 +11,52 @@ import (
 	"strings"
 
 	"github.com/joaoevangelista/geocode/rest"
+	"gopkg.in/go-redis/cache.v1"
+	"gopkg.in/redis.v3"
+	"time"
 )
 
 // Defining the Google Geocoding API
 const (
-	apiBase string = "https://maps.googleapis.com/maps/api/geocode/json"
+	apiBase    string = "https://maps.googleapis.com/maps/api/geocode/json"
+	expiration        = time.Hour
 )
 
 var apiKey = os.Getenv("GOOGLE_GEO_KEY")
+var codec *cache.Codec
+var client http.Client
+
+func init() {
+	client = http.Client{
+		Timeout: 2 * time.Second,
+	}
+
+	ring := redis.NewRing(&redis.RingOptions{
+		Addrs: map[string]string{
+			os.Getenv("REDIS_HOST"): os.Getenv("REDIS_PORT"),
+		},
+		Password:     os.Getenv("REDIS_PASSWORD"),
+		DialTimeout:  3 * time.Second,
+		ReadTimeout:  time.Second,
+		WriteTimeout: time.Second,
+	})
+
+	codec = &cache.Codec{
+		Ring: ring,
+		Marshal: func(v interface{}) ([]byte, error) {
+			return json.Marshal(v)
+		},
+		Unmarshal: func(b []byte, v interface{}) error {
+			return json.Unmarshal(b, v)
+		},
+	}
+}
 
 func main() {
 	if apiKey == "" {
 		log.Fatal("Apikey not present on environment, requests will fail that way!")
 	}
+
 	http.HandleFunc("/coordinates", addrToCoord)
 	http.HandleFunc("/address", coordToAddr)
 	http.ListenAndServe(":4000", nil)
@@ -58,16 +91,44 @@ func coordToAddr(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func toGeo(gr *rest.GeoResponse, addr string) (err error) {
-	resp, err := http.Get(fmt.Sprintf("%s?key=%s&address=%s", apiBase, apiKey, addr))
-	log.Printf("Response from API: %v", resp)
-	return GeoDecoder(gr, resp, err)
+func toGeo(gr *rest.GeoResponse, addr string) error {
+	if e := codec.Get(addr, gr); e == nil && gr.Status != "" {
+		log.Printf("Got value from cache:  %v", gr)
+		return nil
+	} else {
+		resp, err := client.Get(fmt.Sprintf("%s?key=%s&address=%s", apiBase, apiKey, addr))
+		log.Printf("Response from API: %v", resp)
+		if e := GeoDecoder(gr, resp, err); e == nil {
+			codec.Set(&cache.Item{
+				Key:        addr,
+				Object:     gr,
+				Expiration: expiration,
+			})
+			return nil
+		}
+		return e
+	}
+
 }
 
 func toAddr(gr *rest.GeoResponse, coord rest.Location) (err error) {
-	resp, err := http.Get(fmt.Sprintf("%s?key=%s&latlng=%f,%f", apiBase, apiKey, coord.Latitude, coord.Longitude))
-	log.Printf("Response from API: %v", resp)
-	return GeoDecoder(gr, resp, err)
+	key := asKey(coord)
+	if e := codec.Get(key, gr); e == nil && gr.Status != "" {
+		log.Println("Got value from cache:  %v", gr)
+		return nil
+	} else {
+		resp, err := client.Get(fmt.Sprintf("%s?key=%s&latlng=%f,%f", apiBase, apiKey, coord.Latitude, coord.Longitude))
+		log.Printf("Response from API: %v", resp)
+		if e = GeoDecoder(gr, resp, err); e == nil {
+			codec.Set(&cache.Item{
+				Key:        key,
+				Object:     gr,
+				Expiration: expiration,
+			})
+		}
+		return nil
+	}
+
 }
 
 func convertParam(latlng string, w http.ResponseWriter) rest.Location {
@@ -89,11 +150,18 @@ func GeoDecoder(gr *rest.GeoResponse, resp *http.Response, err error) error {
 	}
 	defer resp.Body.Close()
 	c, err := ioutil.ReadAll(resp.Body)
-	log.Printf("Content on response is: %v", string(c))
 	json.Unmarshal(c, &gr)
 	if err != nil {
 		log.Printf("Error %v", err)
-		return fmt.Errorf("Error while decoding responose %v", err)
+		return fmt.Errorf("Error while decoding response %v", err)
 	}
 	return nil
+}
+
+func asKey(v interface{}) string {
+	if js, e := json.Marshal(v); e == nil {
+		return string(js)
+	} else {
+		panic(e)
+	}
 }

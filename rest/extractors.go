@@ -17,5 +17,5 @@ func ExtractAddress(gr *GeoResponse) AddressResponse {
 		result := results[0]
 		return AddressResponse{Address: result.FormattedAddress}
 	}
-	return AddressResponse{Address: Address{}, Error:NestedError{Status: gr.Status, ErrorMessage:gr.ErrorMessage}}
+	return AddressResponse{Address: "", Error: NestedError{Status: gr.Status, ErrorMessage: gr.ErrorMessage}}
 }
