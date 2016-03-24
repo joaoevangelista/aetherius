@@ -23,7 +23,27 @@ Then just run `go run server.go` and open at `:4000`
 URLs
 -----
 
-`/address?latlng=-1231.9,3123.21`translate the latitude and longitude into human readable address
+`/address?latlng=40.7127840,-74.0059410`  translate the latitude and longitude into human readable address
+
+**Response:**
+
+```
+{
+  "address": "New York City Hall, New York, NY 10007, USA"
+}
+
+```
 
 
 `/coordinates?address=New_York` translate the location name into a latitude and longitude pair
+
+**Response:**
+
+```
+{
+    "location": {
+        "lat": 40.7127837,
+        "lng": -74.0059413
+    }
+}
+```
