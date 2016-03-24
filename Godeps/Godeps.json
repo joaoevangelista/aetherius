@@ -1,0 +1,41 @@
+{
+	"ImportPath": "github.com/joaoevangelista/geocode",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v60",
+	"Deps": [
+		{
+			"ImportPath": "gopkg.in/bsm/ratelimit.v1",
+			"Rev": "db14e161995a5177acef654cb0dd785e8ee8bc22"
+		},
+		{
+			"ImportPath": "gopkg.in/go-redis/cache.v1",
+			"Comment": "v1.0.1",
+			"Rev": "75dfeab70abdfb8017dfd2721dba5d3b5e00b736"
+		},
+		{
+			"ImportPath": "gopkg.in/go-redis/cache.v1/lrucache",
+			"Comment": "v1.0.1",
+			"Rev": "75dfeab70abdfb8017dfd2721dba5d3b5e00b736"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v3",
+			"Comment": "v3.6.0",
+			"Rev": "d2ae7d870764d131887fa31a743bb50abbcf9384"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v3/internal/consistenthash",
+			"Comment": "v3.6.0",
+			"Rev": "d2ae7d870764d131887fa31a743bb50abbcf9384"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v3/internal/hashtag",
+			"Comment": "v3.6.0",
+			"Rev": "d2ae7d870764d131887fa31a743bb50abbcf9384"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v3/internal/pool",
+			"Comment": "v3.6.0",
+			"Rev": "d2ae7d870764d131887fa31a743bb50abbcf9384"
+		}
+	]
+}
