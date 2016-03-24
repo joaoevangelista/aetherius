@@ -31,7 +31,6 @@ URLs
 {
   "address": "New York City Hall, New York, NY 10007, USA"
 }
-
 ```
 
 
