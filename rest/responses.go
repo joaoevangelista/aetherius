@@ -19,3 +19,7 @@ type NestedError struct {
 	Status       string `json:"status,omitempty"`
 	ErrorMessage string `json:"error_message,omitempty"`
 }
+
+type Health struct {
+	Status string `json:"status"`
+}

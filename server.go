@@ -57,6 +57,13 @@ func main() {
 		log.Fatal("Apikey not present on environment, requests will fail that way!")
 	}
 
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		if sts, err := json.Marshal(rest.Health{Status: "Ok"}); err == nil {
+			w.Header().Set(rest.ContentType, rest.ApplicationJSON)
+			fmt.Fprint(w, string(sts))
+		}
+
+	})
 	http.HandleFunc("/coordinates", addrToCoord)
 	http.HandleFunc("/address", coordToAddr)
 	http.ListenAndServe(":4000", nil)
@@ -69,6 +76,7 @@ func addrToCoord(w http.ResponseWriter, r *http.Request) {
 	rest.ThrowAPIErrorIfPresent(w, err)
 	js, err := json.Marshal(rest.ExtractLocation(response))
 	rest.ThrowJSONErrorIfPresent(w, err)
+	w.Header().Set(rest.ContentType, rest.ApplicationJSON)
 	fmt.Fprint(w, string(js))
 
 }
@@ -83,6 +91,7 @@ func coordToAddr(w http.ResponseWriter, r *http.Request) {
 			rest.ThrowAPIErrorIfPresent(w, err)
 			js, err := json.Marshal(rest.ExtractAddress(response))
 			rest.ThrowJSONErrorIfPresent(w, err)
+			w.Header().Set(rest.ContentType, rest.ApplicationJSON)
 			fmt.Fprint(w, string(js))
 		}
 	} else {
