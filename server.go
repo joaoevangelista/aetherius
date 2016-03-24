@@ -97,7 +97,6 @@ func toGeo(gr *rest.GeoResponse, addr string) error {
 		return nil
 	} else {
 		resp, err := client.Get(fmt.Sprintf("%s?key=%s&address=%s", apiBase, apiKey, addr))
-		log.Printf("Response from API: %v", resp)
 		if e := GeoDecoder(gr, resp, err); e == nil {
 			codec.Set(&cache.Item{
 				Key:        addr,
@@ -118,7 +117,6 @@ func toAddr(gr *rest.GeoResponse, coord rest.Location) (err error) {
 		return nil
 	} else {
 		resp, err := client.Get(fmt.Sprintf("%s?key=%s&latlng=%f,%f", apiBase, apiKey, coord.Latitude, coord.Longitude))
-		log.Printf("Response from API: %v", resp)
 		if e = GeoDecoder(gr, resp, err); e == nil {
 			codec.Set(&cache.Item{
 				Key:        key,

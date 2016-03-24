@@ -11,23 +11,26 @@ const (
 	APIError        = "API_ERROR"
 	JSONEncodeError = "JSON_ENCODE_ERROR"
 	EncodeError     = "ENCODE_ERROR"
+	ContentType     = "Content-Type"
+	ApplicationJSON = "application/json"
 )
 
 // PrintError send a json error message to writer
 func PrintError(w http.ResponseWriter, status string, message string) {
-	error := NestedError{Status: status, ErrorMessage: message}
-	js, err := json.Marshal(error)
+	nestedErr := NestedError{Status: status, ErrorMessage: message}
+	js, err := json.Marshal(nestedErr)
 	if err != nil {
 		log.Fatal("Error while encoding the error json ")
 	}
-	fmt.Fprintf(w, string(js))
+	w.Header().Set(ContentType, ApplicationJSON)
+	fmt.Fprint(w, string(js))
 }
 
 //ThrowAPIErrorIfPresent ...
 func ThrowAPIErrorIfPresent(w http.ResponseWriter, err error) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		PrintError(w, APIError, fmt.Sprintf("Error while decoding %v %v ", err))
+		PrintError(w, APIError, fmt.Sprintf("Error while decoding %v ", err))
 	}
 }
 
