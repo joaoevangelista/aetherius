@@ -1,4 +1,4 @@
-# geocoder
+# Aetherius
 A geocoding server to interact with Google Geocoding API
 
 Building
