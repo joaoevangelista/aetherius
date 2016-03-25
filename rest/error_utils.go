@@ -30,7 +30,7 @@ func PrintError(w http.ResponseWriter, status string, message string) {
 func ThrowAPIErrorIfPresent(w http.ResponseWriter, err error) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		PrintError(w, APIError, fmt.Sprintf("Error while decoding %v ", err))
+		PrintError(w, APIError, fmt.Sprintf("Error while decoding -> %v ", err))
 	}
 }
 
@@ -38,7 +38,7 @@ func ThrowAPIErrorIfPresent(w http.ResponseWriter, err error) {
 func ThrowJSONErrorIfPresent(w http.ResponseWriter, err error) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		PrintError(w, JSONEncodeError, fmt.Sprintf("Error while encoding json %v", err))
+		PrintError(w, JSONEncodeError, fmt.Sprintf("Error while encoding json -> %v", err))
 	}
 }
 

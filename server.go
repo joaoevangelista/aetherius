@@ -10,10 +10,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/joaoevangelista/geocode/rest"
+	"time"
+
+	"github.com/joaoevangelista/aetherius/rest"
 	"gopkg.in/go-redis/cache.v1"
 	"gopkg.in/redis.v3"
-	"time"
 )
 
 // Defining the Google Geocoding API
@@ -96,7 +97,8 @@ func coordToAddr(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
-		rest.PrintError(w, "PARAMETER_MISMATCH", "latlng parameter is empty or malformated, must be latlng=12.2121,-12.121")
+		rest.PrintError(w, "PARAMETER_MISMATCH",
+			"latlng parameter is empty or malformated, must be latlng=12.2121,-12.121")
 	}
 }
 
