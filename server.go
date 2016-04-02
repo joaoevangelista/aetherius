@@ -10,11 +10,13 @@ import (
 	"strconv"
 	"strings"
 
+	"gopkg.in/go-redis/cache.v1"
+
 	"time"
 
+	"github.com/hashicorp/consul/api"
+	"github.com/joaoevangelista/aetherius/conn"
 	"github.com/joaoevangelista/aetherius/rest"
-	"gopkg.in/go-redis/cache.v1"
-	"gopkg.in/redis.v3"
 )
 
 // Defining the Google Geocoding API
@@ -26,31 +28,15 @@ const (
 var apiKey = os.Getenv("GOOGLE_GEO_KEY")
 var codec *cache.Codec
 var client http.Client
+var consul *api.Client
 
 func init() {
 	client = http.Client{
 		Timeout: 2 * time.Second,
 	}
 
-	ring := redis.NewRing(&redis.RingOptions{
-		Addrs: map[string]string{
-			os.Getenv("REDIS_HOST"): os.Getenv("REDIS_PORT"),
-		},
-		Password:     os.Getenv("REDIS_PASSWORD"),
-		DialTimeout:  3 * time.Second,
-		ReadTimeout:  time.Second,
-		WriteTimeout: time.Second,
-	})
-
-	codec = &cache.Codec{
-		Ring: ring,
-		Marshal: func(v interface{}) ([]byte, error) {
-			return json.Marshal(v)
-		},
-		Unmarshal: func(b []byte, v interface{}) error {
-			return json.Unmarshal(b, v)
-		},
-	}
+	codec = conn.InitRedis()
+	consul = conn.InitConsul()
 }
 
 func main() {
@@ -63,8 +49,8 @@ func main() {
 			w.Header().Set(rest.ContentType, rest.ApplicationJSON)
 			fmt.Fprint(w, string(sts))
 		}
-
 	})
+
 	http.HandleFunc("/coordinates", addrToCoord)
 	http.HandleFunc("/address", coordToAddr)
 	http.ListenAndServe(":4000", nil)

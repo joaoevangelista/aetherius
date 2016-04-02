@@ -46,3 +46,16 @@ URLs
     }
 }
 ```
+
+Consul
+---
+
+We can connect to Consul using the provided environment variables from API
+ - `CONSUL_HTTP_ADDR`
+ - `CONSUL_HTTP_TOKEN`
+ - `CONSUL_HTTP_AUTH`
+ - `CONSUL_HTTP_SSL`
+ - `CONSUL_HTTP_SSL_VERIFY`
+
+ Any changes need from default can be set on environment variables, so the client can pick easily without code modification.
+ In case of failure the application will still run. So we don't get strings attached on Consul.
